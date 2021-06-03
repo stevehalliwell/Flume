@@ -30,6 +30,9 @@ namespace AIR.Flume
             where TImplementation : TService
         {
             CheckServiceCollision<TService>();
+            if (CheckExistingRelation<TService>())
+                return;
+
             var service = Activator.CreateInstance(typeof(TImplementation));
             _services.Add(typeof(TService), service);
         }
@@ -38,6 +41,9 @@ namespace AIR.Flume
             where TImplementation : class
         {
             CheckServiceCollision<TImplementation>();
+            if (CheckExistingRelation<TImplementation>())
+                return;
+
             var service = Activator.CreateInstance(typeof(TImplementation));
             _services.Add(typeof(TImplementation), service);
         }
@@ -47,6 +53,20 @@ namespace AIR.Flume
         {
             CheckServiceCollision<TImplementation>();
             _services.Add(typeof(TImplementation), implementation);
+        }
+
+        private bool CheckExistingRelation<TService>()
+            where TService : class
+        {
+            foreach (var item in _services.Values)
+            {
+                if(item is TService)
+                {
+                    _services[typeof(TService)] = item;
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void CheckServiceCollision<T>()
